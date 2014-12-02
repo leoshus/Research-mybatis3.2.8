@@ -19,11 +19,11 @@
 		<!-- 启用时，带延迟加载属性的对象的加载与否完全取决于对任意延迟属性的调用 反之 每种属性将会按需加载 -->
 		<setting name="aggressiveLazyLoading" value="true"/>
 		<!-- 是否允许单一语句返回多结果集 (需要兼容驱动) -->
-		<setting name="multipleResultSetEnabled" value="true"/>
+		<setting name="multipleResultSetsEnabled" value="true"/>
 		<!-- 使用列标签代替列名。不同的驱动在这方面有不同的表现 具体可以参考相关驱动文档或通过测试这两种不同的模式来观察所用驱动的结果 -->
 		<setting name="useColumnLabel" value="true"/>
 		<!-- 允许JDBC支持自动生成主键，需要驱动兼容。如果设置为true则这个设置强制使用自动生成主键，尽管一些驱动不兼容但仍能正常工作(如Derby) -->
-		<setting name="useGeneratesKeys" value="false"/>
+		<setting name="useGeneratedKeys" value="false"/>
 		<!-- 指定MyBatis是否以及如何自动映射指定的列到字段或属性。
 		NONE表示取消自动映射；
 		PARTIAL只会自动映射没有定义嵌套结果集映射的结果集。
@@ -40,7 +40,6 @@
 	<typeAliases>
 		<!-- <typeAlias type="" alias=""/> -->
 	</typeAliases>	
-	<!-- http://wuxiangqian.iteye.com/blog/1987841 -->
 	<environments default="development">
 		<environment id="development">
 			<transactionManager type="JDBC"/>
@@ -58,6 +57,6 @@
 	</environments>
 
 	<mappers>
-		<mapper resource=""/>
+		<mapper resource="com/sdw/soft/test/showcase/user.xml"/>
 	</mappers>
 </configuration>

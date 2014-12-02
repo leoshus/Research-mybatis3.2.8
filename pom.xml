@@ -127,6 +127,7 @@
     <osgi.dynamicImport>*</osgi.dynamicImport>
     <javac.src.version>1.6</javac.src.version>
     <javac.target.version>1.6</javac.target.version>
+    <mysql.version>5.1.28</mysql.version>
   </properties>
 
   <dependencies>
@@ -230,6 +231,13 @@
       <version>9.1-901.jdbc3</version>
       <scope>test</scope>
     </dependency>
+    <!-- jdbc drivers -->
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<version>${mysql.version}</version>
+			<scope>runtime</scope>
+		</dependency>
   </dependencies>
 
   <build>
