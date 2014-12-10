@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
@@ -27,9 +28,9 @@ public class ShowMyBatis {
 	private static final Logger logger = LoggerFactory.getLogger(ShowMyBatis.class);
 	private SqlSession session = null;
 	@Before
-	public void setup(){
-		InputStream is = ShowMyBatis.class.getClass().getResourceAsStream("/com/sdw/soft/test/showcase/mybatis-config.xml");
-//		InputStream iss = Resources.getResourceAsStream("mybatis-config.xml");
+	public void setup() throws IOException{
+		InputStream is = Resources.getResourceAsStream("com/sdw/soft/test/showcase/mybatis-config.xml");
+//		InputStream is = ShowMyBatis.class.getClass().getResourceAsStream("/com/sdw/soft/test/showcase/mybatis-config.xml");
 		SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(is);
 		if(session == null)
 			session = sqlSessionFactory.openSession();

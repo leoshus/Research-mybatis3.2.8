@@ -93,6 +93,7 @@ public class XMLConfigBuilder extends BaseBuilder {
     return configuration;
   }
 
+  //解析MyBatis配置文件根节点<Configuration>下的10个子节点
   private void parseConfiguration(XNode root) {
     try {
       propertiesElement(root.evalNode("properties")); //issue #117 read properties first

@@ -31,9 +31,11 @@ import org.apache.ibatis.session.defaults.DefaultSqlSessionFactory;
  */
 /**
  * @author Clinton Begin
+ * @desription 构建SqlSessionFactory  工厂模式
  */
 public class SqlSessionFactoryBuilder {
 
+  //以字符流的形式读入配置文件
   public SqlSessionFactory build(Reader reader) {
     return build(reader, null, null);
   }
@@ -41,16 +43,25 @@ public class SqlSessionFactoryBuilder {
   public SqlSessionFactory build(Reader reader, String environment) {
     return build(reader, environment, null);
   }
-
+  //作为方法参数的properties > 资源/url中的properties > properties元素的子元素<property>
   public SqlSessionFactory build(Reader reader, Properties properties) {
     return build(reader, null, properties);
   }
 
+  /**
+   * 比较常用的方法
+   * @param reader 以字符流读入配置文件
+   * @param environment 决定使用哪个环境(测试、开发、生产)  包括了数据源 和 事务管理器的配置
+   * @param properties 方法参数properties，配置文件中仍然可以使用${} 来为properties中的值占位
+   * @return
+   */
   public SqlSessionFactory build(Reader reader, String environment, Properties properties) {
     try {
+    //使用XMLConfigBuilder解析MyBatis配置文件
       XMLConfigBuilder parser = new XMLConfigBuilder(reader, environment, properties);
       return build(parser.parse());
     } catch (Exception e) {
+    	//这里捕获异常 并包装成自己的异常
       throw ExceptionFactory.wrapException("Error building SqlSession.", e);
     } finally {
       ErrorContext.instance().reset();

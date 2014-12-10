@@ -8,6 +8,7 @@
 		<!-- <property name="username" value="sa"/>
 		<property name="password" value="sa"/> -->
 	</properties>
+	
 	<!-- 设置缓存和延迟加载等等运行时的行为方式 -->
 	<settings>
 		<!-- 设置超时时间，他决定驱动等待一个数据库响应时间 -->
