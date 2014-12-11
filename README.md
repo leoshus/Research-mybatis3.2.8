@@ -2,12 +2,14 @@
 =====================
 ####官方WIKI:
 ------------
-> [MyBatis](http://mybatis.github.io/mybatis-3/)
-> [MyBatis-Spring](http://mybatis.github.io/spring/)
+* [MyBatis](http://mybatis.github.io/mybatis-3/)
+* [MyBatis-Spring](http://mybatis.github.io/spring/)
 
 * MyBatis完成了Java对象到输入参数的映射以及结果集到java对象的转化工作。既解决了Java对象与输入参数和结果集的映射，又方便了用户手写使用SQL语句。
-	>2014/11/28 ---start---
-	> [org.apache.ibatis.session.Configuration](https://github.com/sdw2330976/Research-mybatis3.2.8/tree/master/mydoc/configuration.md)
+* 2014/11/28 ---start---
+> 代码分析
+	* [org.apache.ibatis.parsing](https://github.com/sdw2330976/Research-mybatis3.2.8/tree/master/mydoc/parsing.md)
+	* [org.apache.ibatis.session.Configuration](https://github.com/sdw2330976/Research-mybatis3.2.8/tree/master/mydoc/configuration.md)
 
 ####全局配置文件 
 ---------------
