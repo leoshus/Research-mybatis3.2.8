@@ -44,6 +44,7 @@ import org.apache.ibatis.type.JdbcType;
 
 /**
  * @author Clinton Begin
+ * xml配置解析 建造者模式 
  */
 public class XMLConfigBuilder extends BaseBuilder {
 
@@ -60,6 +61,7 @@ public class XMLConfigBuilder extends BaseBuilder {
   }
 
   public XMLConfigBuilder(Reader reader, String environment, Properties props) {
+	  //构造一个需要验证XMLMapperEntityResolver的XPathParser对象
     this(new XPathParser(reader, true, props, new XMLMapperEntityResolver()), environment, props);
   }
 

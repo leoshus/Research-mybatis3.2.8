@@ -1,13 +1,18 @@
 ###Research-mybatis3.2.8
 =====================
 ####官方WIKI:
+------------
 > [MyBatis](http://mybatis.github.io/mybatis-3/)
 > [MyBatis-Spring](http://mybatis.github.io/spring/)
+
 * MyBatis完成了Java对象到输入参数的映射以及结果集到java对象的转化工作。既解决了Java对象与输入参数和结果集的映射，又方便了用户手写使用SQL语句。
-* 2014/11/28 ---start---
-> [org.apache.ibatis.session.Configuration](https://github.com/sdw2330976/Research-mybatis3.2.8/tree/master/mydoc/configuration.md)
-#### 全局配置文件 
+	>2014/11/28 ---start---
+	> [org.apache.ibatis.session.Configuration](https://github.com/sdw2330976/Research-mybatis3.2.8/tree/master/mydoc/configuration.md)
+
+####全局配置文件 
+---------------
 * MyBatis像其他ORM框架一样也具有自己的全局配置文件,以下是一个简单的配置示例：
+
 ```
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd">
@@ -19,7 +24,6 @@
 		<!-- <property name="username" value="sa"/>
 		<property name="password" value="sa"/> -->
 	</properties>
-	
 	<!-- 设置缓存和延迟加载等等运行时的行为方式 -->
 	<settings>
 		<!-- 设置超时时间，他决定驱动等待一个数据库响应时间 -->
@@ -46,7 +50,6 @@
 		    REUSE执行器会重用预处理语句(PreparedStatements)
 		    BATCH执行器将重用语句并执行批量更新 -->
 		<setting name="defaultExecutorType" value="SIMPLE"/>
-		
 	</settings>
 	<!-- 别名 -->
 	<typeAliases>
@@ -67,7 +70,6 @@
 			</dataSource>
 		</environment>
 	</environments>
-
 	<mappers>
 		<mapper resource="com/sdw/soft/test/showcase/user.xml"/>
 	</mappers>
@@ -85,6 +87,7 @@
 * mappers---------应用中用到的所有SQL映射文件都在这里列表，方便MyBatis管理
 有了如上配置，MyBatis就可以与数据库建立连接，并应用给定的连接池和事务属性，MyBatis封装了这些操作，并暴露出SqlSessionFactory实例供开发者使用，
 从而创建SQLSession实例进行业务逻辑操作，而不用反复书写JDBC相关的代码。
+
 ```
 InputStream is = Resources.getResourceAsStream("com/sdw/soft/test/showcase/mybatis-config.xml");
 SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(is);
@@ -92,6 +95,7 @@ if(session == null)
 	session = sqlSessionFactory.openSession();
 ```
 ####代码配置
+------------
 当然我们除了使用全局配置文件，来配置MyBatis 我们亦可通过代码直接对MyBatis进行配置
 ```
 DataSource ds = getDataSource();//获取数据源
@@ -101,4 +105,9 @@ Configuration configuration = new Configuration(environment);
 configuration.addMapper(MapperTest.class);
 SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(configuration);
 ```
+
+####设计模式
+------------
+* 1.[建造模式](https://github.com/sdw2330976/Research-mybatis3.2.8/tree/master/mydoc/designPattern/builder.md)XMLConfigBuilder/XMLMapperBuilder/XMLStatementBuilder/CacheBuilder,Environment,把建造的步骤分装到一个类里,且运用了fluent API模式。
+
 mybatis3-cn /cnblogs search

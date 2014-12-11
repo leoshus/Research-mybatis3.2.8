@@ -28,13 +28,19 @@ import org.xml.sax.SAXException;
 
 /**
  * Offline entity resolver for the MyBatis DTDs
- * 
+ * 未联网的情况下为MyBatis的DTD做验证。
+ * 实现原理：将DTD搞到本地，然后利用org.xml.sax.EntityResolver,最后调用DoucmentBuilder.setEntityResolver来达到脱机验证
+ * EntityResolver->public InputSource resolveEntity(String publicId,String systemId)
+ * 应用程序可以使用此接口将系统标识符重定向到本地URI
+ * 用DTD是比较过时的做法，新的都改用xsd
+ * 这个类的名字并不准确，因为它被两个类都用到了(XMLConfigBuilder,XMLMapperBuilder)
  * @author Clinton Begin
  */
 public class XMLMapperEntityResolver implements EntityResolver {
 
   private static final Map<String, String> doctypeMap = new HashMap<String, String>();
-
+ //常量定义
+  //<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
   private static final String IBATIS_CONFIG_PUBLIC = "-//ibatis.apache.org//DTD Config 3.0//EN".toUpperCase(Locale.ENGLISH);
   private static final String IBATIS_CONFIG_SYSTEM = "http://ibatis.apache.org/dtd/ibatis-3-config.dtd".toUpperCase(Locale.ENGLISH);
 
@@ -50,6 +56,7 @@ public class XMLMapperEntityResolver implements EntityResolver {
   private static final String MYBATIS_CONFIG_DTD = "org/apache/ibatis/builder/xml/mybatis-3-config.dtd";
   private static final String MYBATIS_MAPPER_DTD = "org/apache/ibatis/builder/xml/mybatis-3-mapper.dtd";
 
+  //将DOCTYPE和URL都映射到本地类路径下的DTD
   static {
     doctypeMap.put(IBATIS_CONFIG_SYSTEM, MYBATIS_CONFIG_DTD);
     doctypeMap.put(IBATIS_CONFIG_PUBLIC, MYBATIS_CONFIG_DTD);
@@ -70,7 +77,7 @@ public class XMLMapperEntityResolver implements EntityResolver {
    * @param publicId The public id that is what comes after "PUBLIC"
    * @param systemId The system id that is what comes after the public id.
    * @return The InputSource for the DTD
-   * 
+   * 通过publicId或SystemId查找本地DTD 
    * @throws org.xml.sax.SAXException If anything goes wrong
    */
   public InputSource resolveEntity(String publicId, String systemId) throws SAXException {
