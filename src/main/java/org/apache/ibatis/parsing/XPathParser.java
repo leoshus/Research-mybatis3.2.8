@@ -40,16 +40,18 @@ import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
 /**
+ * XPath解析器 封装JDK的类
  * @author Clinton Begin
  */
 public class XPathParser {
 
   private Document document;
-  private boolean validation;
+  private boolean validation;//是否需要验证
   private EntityResolver entityResolver;
   private Properties variables;
   private XPath xpath;
 
+  //一些构造函数，全部调用commonConstructor和createDocument 1~4 默认不需要验证
   public XPathParser(String xml) {
     commonConstructor(false, null, null);
     this.document = createDocument(new InputSource(new StringReader(xml)));
@@ -69,7 +71,7 @@ public class XPathParser {
     commonConstructor(false, null, null);
     this.document = document;
   }
-
+  //5~8 传入是否需要验证参数
   public XPathParser(String xml, boolean validation) {
     commonConstructor(validation, null, null);
     this.document = createDocument(new InputSource(new StringReader(xml)));
@@ -89,7 +91,7 @@ public class XPathParser {
     commonConstructor(validation, null, null);
     this.document = document;
   }
-
+  //9~12 传入是否需要验证参数以及properties
   public XPathParser(String xml, boolean validation, Properties variables) {
     commonConstructor(validation, variables, null);
     this.document = createDocument(new InputSource(new StringReader(xml)));
@@ -109,7 +111,7 @@ public class XPathParser {
     commonConstructor(validation, variables, null);
     this.document = document;
   }
-
+  //13~16 传入是否需要验证参数、properties、entityResolver
   public XPathParser(String xml, boolean validation, Properties variables, EntityResolver entityResolver) {
     commonConstructor(validation, variables, entityResolver);
     this.document = createDocument(new InputSource(new StringReader(xml)));
@@ -129,7 +131,7 @@ public class XPathParser {
     commonConstructor(validation, variables, entityResolver);
     this.document = document;
   }
-
+  //设置properties
   public void setVariables(Properties variables) {
     this.variables = variables;
   }
@@ -139,7 +141,9 @@ public class XPathParser {
   }
 
   public String evalString(Object root, String expression) {
+	  //xpath 解析
     String result = (String) evaluate(expression, root, XPathConstants.STRING);
+    //使用PropertyParser解析 替换${}占位
     result = PropertyParser.parse(result, variables);
     return result;
   }
@@ -195,7 +199,7 @@ public class XPathParser {
   public List<XNode> evalNodes(String expression) {
     return evalNodes(document, expression);
   }
-
+  //返回节点list
   public List<XNode> evalNodes(Object root, String expression) {
     List<XNode> xnodes = new ArrayList<XNode>();
     NodeList nodes = (NodeList) evaluate(expression, root, XPathConstants.NODESET);
@@ -219,6 +223,7 @@ public class XPathParser {
 
   private Object evaluate(String expression, Object root, QName returnType) {
     try {
+    	//直接调用xpath的evaluate
       return xpath.evaluate(expression, root, returnType);
     } catch (Exception e) {
       throw new BuilderException("Error evaluating XPath.  Cause: " + e, e);
@@ -230,14 +235,20 @@ public class XPathParser {
     try {
       DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
       factory.setValidating(validation);
-
+      //名称空间
       factory.setNamespaceAware(false);
+      //忽略注释
       factory.setIgnoringComments(true);
+      //忽略空白
       factory.setIgnoringElementContentWhitespace(false);
+      //将CDATA节点转换为Text节点
       factory.setCoalescing(false);
+      //扩展实体引用
       factory.setExpandEntityReferences(true);
 
       DocumentBuilder builder = factory.newDocumentBuilder();
+      //定义了EntityResolver(XMLMapperEntityResolver)这样就不同联网获取DTD
+      //将DTD放在org/apache/ibatis/builder/xml/mybatis-3-config.dtd，来验证xml的合法性
       builder.setEntityResolver(entityResolver);
       builder.setErrorHandler(new ErrorHandler() {
         public void error(SAXParseException exception) throws SAXException {
@@ -261,7 +272,7 @@ public class XPathParser {
     this.validation = validation;
     this.entityResolver = entityResolver;
     this.variables = variables;
-    XPathFactory factory = XPathFactory.newInstance();
+    XPathFactory factory = XPathFactory.newInstance();//共通构造函数，除了把参数都设置到实例变量里面去以外，还初始化了XPath
     this.xpath = factory.newXPath();
   }
 

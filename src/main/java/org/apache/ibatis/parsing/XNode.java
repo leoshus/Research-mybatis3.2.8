@@ -27,11 +27,12 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 /**
+ * org.w3c.dom.Node的封装
  * @author Clinton Begin
  */
 public class XNode {
 
-  private Node node;
+  private Node node;//org.w3c.dom.Node
   private String name;
   private String body;
   private Properties attributes;
@@ -59,7 +60,7 @@ public class XNode {
       return new XNode(xpathParser, parent, variables);
     }
   }
-
+  //从子节点向父节点取得path 通过倒序插入完成
   public String getPath() {
     StringBuilder builder = new StringBuilder();
     Node current = node;
@@ -72,7 +73,15 @@ public class XNode {
     }
     return builder.toString();
   }
-
+	//取得标示符   ("resultMap[authorResult]")
+	//XMLMapperBuilder.resultMapElement调用
+//	<resultMap id="authorResult" type="Author">
+//	  <id property="id" column="author_id"/>
+//	  <result property="username" column="author_username"/>
+//	  <result property="password" column="author_password"/>
+//	  <result property="email" column="author_email"/>
+//	  <result property="bio" column="author_bio"/>
+//	</resultMap>
   public String getValueBasedIdentifier() {
     StringBuilder builder = new StringBuilder();
     XNode current = this;
@@ -80,6 +89,7 @@ public class XNode {
       if (current != this) {
         builder.insert(0, "_");
       }
+      //先取id取不到取value取不到取property 挺有意思
       String value = current.getStringAttribute("id",
           current.getStringAttribute("value",
               current.getStringAttribute("property", null)));
@@ -95,7 +105,7 @@ public class XNode {
     }
     return builder.toString();
   }
-
+  //一下为XPathParser的代理方法
   public String evalString(String expression) {
     return xpathParser.evalString(node, expression);
   }
@@ -123,7 +133,7 @@ public class XNode {
   public String getName() {
     return name;
   }
-
+  //以下是一些getBody方法
   public String getStringBody() {
     return getStringBody(null);
   }
@@ -195,7 +205,7 @@ public class XNode {
       return Float.parseFloat(body);
     }
   }
-
+  //以下是一些getAttribute方法
   public <T extends Enum<T>> T getEnumAttribute(Class<T> enumType, String name) {
     return getEnumAttribute(enumType, name, null);
   }
@@ -286,7 +296,7 @@ public class XNode {
       return Float.parseFloat(value);
     }
   }
-
+  //通过Node.getChildNodes获取孩子节点
   public List<XNode> getChildren() {
     List<XNode> children = new ArrayList<XNode>();
     NodeList nodeList = node.getChildNodes();
@@ -352,13 +362,13 @@ public class XNode {
     if (attributeNodes != null) {
       for (int i = 0; i < attributeNodes.getLength(); i++) {
         Node attribute = attributeNodes.item(i);
-        String value = PropertyParser.parse(attribute.getNodeValue(), variables);
+        String value = PropertyParser.parse(attribute.getNodeValue(), variables);//将${}中的占位 用properties中的key-value替换
         attributes.put(attribute.getNodeName(), value);
       }
     }
     return attributes;
   }
-
+  //取不到body 就取孩子节点的body  取到第一个就返回
   private String parseBody(Node node) {
     String data = getBodyData(node);
     if (data == null) {

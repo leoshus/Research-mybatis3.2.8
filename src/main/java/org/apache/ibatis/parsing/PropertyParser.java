@@ -18,6 +18,7 @@ package org.apache.ibatis.parsing;
 import java.util.Properties;
 
 /**
+ * 属性解析器 解析${}占位的属性
  * @author Clinton Begin
  */
 public class PropertyParser {
@@ -34,7 +35,7 @@ public class PropertyParser {
     public VariableTokenHandler(Properties variables) {
       this.variables = variables;
     }
-
+    //通过key从properties文件中找到对应的value返回
     public String handleToken(String content) {
       if (variables != null && variables.containsKey(content)) {
         return variables.getProperty(content);
