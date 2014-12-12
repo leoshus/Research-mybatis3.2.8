@@ -2,6 +2,7 @@ package com.sdw.soft.test.showcase;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Proxy;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -80,5 +81,10 @@ public class ShowMyBatis {
 		session.commit();
 		session.close();
 		logger.info("------------执行完毕----------");
+	}
+	
+	@Test
+	public void test05(){
+		
 	}
 }

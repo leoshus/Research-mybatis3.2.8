@@ -9,6 +9,7 @@
 * 2014/11/28 ---start---
 > 代码分析
 	* [org.apache.ibatis.parsing](https://github.com/sdw2330976/Research-mybatis3.2.8/tree/master/mydoc/parsing.md)
+	* [org.apache.ibatis.binding](https://github.com/sdw2330976/Research-mybatis3.2.8/tree/master/mydoc/binding.md)其中MapperMethod中关于注解的处理比较简单易懂 以后如若自定义注解 可以参考这里
 	* [org.apache.ibatis.session.Configuration](https://github.com/sdw2330976/Research-mybatis3.2.8/tree/master/mydoc/configuration.md)
 
 ####全局配置文件 

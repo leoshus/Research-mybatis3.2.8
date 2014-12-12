@@ -44,6 +44,12 @@ public class MapperMethod {
     this.method = new MethodSignature(config, method);
   }
 
+  /**
+   * 执行的4中情况 insert|update|delete|select
+   * @param sqlSession
+   * @param args
+   * @return
+   */
   public Object execute(SqlSession sqlSession, Object[] args) {
     Object result;
     if (SqlCommandType.INSERT == command.getType()) {
@@ -57,13 +63,14 @@ public class MapperMethod {
       result = rowCountResult(sqlSession.delete(command.getName(), param));
     } else if (SqlCommandType.SELECT == command.getType()) {
       if (method.returnsVoid() && method.hasResultHandler()) {
+    	//如果存在结果处理器
         executeWithResultHandler(sqlSession, args);
         result = null;
-      } else if (method.returnsMany()) {
+      } else if (method.returnsMany()) {//如果结果有多条记录
         result = executeForMany(sqlSession, args);
-      } else if (method.returnsMap()) {
+      } else if (method.returnsMap()) {//如果结果为Map
         result = executeForMap(sqlSession, args);
-      } else {
+      } else {//结果为一条记录
         Object param = method.convertArgsToSqlCommandParam(args);
         result = sqlSession.selectOne(command.getName(), param);
       }
@@ -77,15 +84,20 @@ public class MapperMethod {
     return result;
   }
 
+  /**
+   * 对方法返回值的类型进行一些检查，使得更安全
+   * @param rowCount
+   * @return
+   */
   private Object rowCountResult(int rowCount) {
     final Object result;
     if (method.returnsVoid()) {
       result = null;
-    } else if (Integer.class.equals(method.getReturnType()) || Integer.TYPE.equals(method.getReturnType())) {
+    } else if (Integer.class.equals(method.getReturnType()) || Integer.TYPE.equals(method.getReturnType())) {//返回值为大int或小int
       result = rowCount;
-    } else if (Long.class.equals(method.getReturnType()) || Long.TYPE.equals(method.getReturnType())) {
+    } else if (Long.class.equals(method.getReturnType()) || Long.TYPE.equals(method.getReturnType())) {//返回值为大long或小long
       result = (long) rowCount;
-    } else if (Boolean.class.equals(method.getReturnType()) || Boolean.TYPE.equals(method.getReturnType())) {
+    } else if (Boolean.class.equals(method.getReturnType()) || Boolean.TYPE.equals(method.getReturnType())) {//返回值为大boolean或小boolean
       result = (rowCount > 0);
     } else {
       throw new BindingException("Mapper method '" + command.getName() + "' has an unsupported return type: " + method.getReturnType());
@@ -93,6 +105,11 @@ public class MapperMethod {
     return result;
   }
 
+  /**
+   * 结果处理器
+   * @param sqlSession
+   * @param args
+   */
   private void executeWithResultHandler(SqlSession sqlSession, Object[] args) {
     MappedStatement ms = sqlSession.getConfiguration().getMappedStatement(command.getName());
     if (void.class.equals(ms.getResultMaps().get(0).getType())) {
@@ -109,9 +126,16 @@ public class MapperMethod {
     }
   }
 
+  /**
+   * 多条记录
+   * @param sqlSession
+   * @param args
+   * @return
+   */
   private <E> Object executeForMany(SqlSession sqlSession, Object[] args) {
     List<E> result;
     Object param = method.convertArgsToSqlCommandParam(args);
+    //带入RowBounds
     if (method.hasRowBounds()) {
       RowBounds rowBounds = method.extractRowBounds(args);
       result = sqlSession.<E>selectList(command.getName(), param, rowBounds);
@@ -155,6 +179,7 @@ public class MapperMethod {
     return result;
   }
 
+  //自定义一个自己的Map 有着更加严格的get方法 若没有对应的key 就会报错
   public static class ParamMap<V> extends HashMap<String, V> {
 
     private static final long serialVersionUID = -2212268410512043556L;
@@ -169,6 +194,7 @@ public class MapperMethod {
 
   }
 
+  //SQL命令
   public static class SqlCommand {
 
     private final String name;
@@ -180,6 +206,7 @@ public class MapperMethod {
       if (configuration.hasStatement(statementName)) {
         ms = configuration.getMappedStatement(statementName);
       } else if (!mapperInterface.equals(method.getDeclaringClass().getName())) { // issue #35
+    	//若不是这个Mapper接口的方法 再去查父类
         String parentStatementName = method.getDeclaringClass().getName() + "." + method.getName();
         if (configuration.hasStatement(parentStatementName)) {
           ms = configuration.getMappedStatement(parentStatementName);
@@ -204,6 +231,7 @@ public class MapperMethod {
     }
   }
 
+  //方法签名
   public static class MethodSignature {
 
     private final boolean returnsMany;
@@ -223,25 +251,34 @@ public class MapperMethod {
       this.mapKey = getMapKey(method);
       this.returnsMap = (this.mapKey != null);
       this.hasNamedParameters = hasNamedParams(method);
+      //以下重复循环2遍调用getUniqueParamIndex，是不是降低效率了
+      //记下RowBounds是第几个参数
       this.rowBoundsIndex = getUniqueParamIndex(method, RowBounds.class);
+      //记下ResultHandler是第几个参数
       this.resultHandlerIndex = getUniqueParamIndex(method, ResultHandler.class);
       this.params = Collections.unmodifiableSortedMap(getParams(method, this.hasNamedParameters));
     }
 
     public Object convertArgsToSqlCommandParam(Object[] args) {
       final int paramCount = params.size();
-      if (args == null || paramCount == 0) {
+      if (args == null || paramCount == 0) {//没有参数
         return null;
-      } else if (!hasNamedParameters && paramCount == 1) {
+      } else if (!hasNamedParameters && paramCount == 1) {//存在一个参数
         return args[params.keySet().iterator().next()];
       } else {
+    	//否则，返回一个ParamMap,修改参数名,参数名就是其位置
         final Map<String, Object> param = new ParamMap<Object>();
         int i = 0;
         for (Map.Entry<Integer, String> entry : params.entrySet()) {
+        	//1 先加一个#{1},#{2},#{3}...参数
           param.put(entry.getValue(), args[entry.getKey()]);
           // issue #71, add param names as param1, param2...but ensure backward compatibility
           final String genericParamName = "param" + String.valueOf(i + 1);
           if (!param.containsKey(genericParamName)) {
+        	//2.再加一个#{param1},#{param2}...参数
+        	//你可以传递多个参数给一个映射器方法，如果你这样做了
+        	//默认情况下它们将会以它们在参数列表中的位置来命名,比如:#{param1},#{param2}等。
+        	//如果你想改变参数的名称(只在多参数情况下),那么你可以使用注解@Param("paramName")
             param.put(genericParamName, args[entry.getKey()]);
           }
           i++;
@@ -301,6 +338,12 @@ public class MapperMethod {
       return index;
     }
 
+    /**
+     * 查找方法返回值是否为Map类型 如果是则判断该method上是否存在MapKey注解
+     * 如果存在MapKey注解，则将这个注解的值作为map的key
+     * @param method
+     * @return
+     */
     private String getMapKey(Method method) {
       String mapKey = null;
       if (Map.class.isAssignableFrom(method.getReturnType())) {
@@ -311,14 +354,19 @@ public class MapperMethod {
       }
       return mapKey;
     }
-
+    //获取method中的参数 并放入到TreeMap
     private SortedMap<Integer, String> getParams(Method method, boolean hasNamedParameters) {
+    	//使用一个TreeMap,保证方法中的参数 能够还是保持参数的先后顺序
       final SortedMap<Integer, String> params = new TreeMap<Integer, String>();
+      //返回method中的参数数组
       final Class<?>[] argTypes = method.getParameterTypes();
       for (int i = 0; i < argTypes.length; i++) {
+    	  //参数不是RowBounds与ResultHandler类型
         if (!RowBounds.class.isAssignableFrom(argTypes[i]) && !ResultHandler.class.isAssignableFrom(argTypes[i])) {
+        	//参数的名字默认为0,1,2 这也是为什么xml里面可以使用#{}来标识参数的原因
           String paramName = String.valueOf(params.size());
           if (hasNamedParameters) {
+        	  //使用注解@Param来重命名参数
             paramName = getParamNameFromAnnotation(method, i, paramName);
           }
           params.put(i, paramName);
@@ -328,9 +376,10 @@ public class MapperMethod {
     }
 
     private String getParamNameFromAnnotation(Method method, int i, String paramName) {
+    	//取出第i个参数上的所有Annotation
       final Object[] paramAnnos = method.getParameterAnnotations()[i];
       for (Object paramAnno : paramAnnos) {
-        if (paramAnno instanceof Param) {
+        if (paramAnno instanceof Param) {//如果参数上存在Param注解 这将Param注解中的value值作为参数的名称
           paramName = ((Param) paramAnno).value();
         }
       }
@@ -343,6 +392,7 @@ public class MapperMethod {
       for (Object[] paramAnno : paramAnnos) {
         for (Object aParamAnno : paramAnno) {
           if (aParamAnno instanceof Param) {
+        	//查找@Param注解，一般不会用注解吧，可以忽略
             hasNamedParams = true;
             break;
           }
